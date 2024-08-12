@@ -1,0 +1,82 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: ./app_start
+    environment:
+      - pass=${pass}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - service_review
+      - service_auth
+      - redis
+
+  service_review:
+    build:
+      context: .
+      dockerfile: ./service_review/Dockerfile
+    command: ./service_review_start
+    environment:
+      - pass=${pass}
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysql
+
+
+  service_rating:
+    build:
+      context: .
+      dockerfile: ./service_rating/Dockerfile
+    command: ./service_rating_start
+    environment:
+      - pass=${pass}
+    ports:
+      - "8083:8083"
+    depends_on:
+      - mysql
+
+  service_auth:
+    build:
+      context: .
+      dockerfile: ./service_auth/Dockerfile
+    command: ./service_auth_start
+    environment:
+      - pass=${pass}
+    ports:
+      - "8082:8082"
+    depends_on:
+      - mysql
+      - redis
+
+  mysql:
+    image: mysql:8
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: ${pass}
+      MYSQL_DATABASE: golang
+    ports:
+      - '3306:3306'
+    volumes:
+#      - mysql-data:/var/lib/mysql
+      - './_sql/:/docker-entrypoint-initdb.d/'
+
+  redis:
+    image: 'redis'
+    ports:
+      - '6379:6379'
+
+  rabbitmq:
+    image: 'rabbitmq'
+    ports:
+      - '5672:5672'
+
+#
+#volumes:
+#  mysql-data:
+#    driver: local

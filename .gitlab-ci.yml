@@ -1,0 +1,25 @@
+stages:
+  - checks
+
+build:
+  image: golang:1.21.1
+  stage: checks
+  script:
+    - echo "Building the app"
+    - make build
+
+
+lint:
+  image: golangci/golangci-lint:latest
+  stage: checks
+  script:
+    - echo "Running linter"
+    - make lint
+
+
+test:
+  image: golang:1.21.1
+  stage: checks
+  script:
+    - echo "Running tests"
+    - make test
